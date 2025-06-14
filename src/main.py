@@ -34,17 +34,31 @@ else:
     print(f"Successfully fetched {top_headlines.get('totalResults')} headlines.")
     documents = []
     for idx, article in enumerate(top_headlines["articles"]):
-        document = {"id": idx, "language": language, "text": article.get("content")}
+        document = {
+            "id": idx,
+            "language": language,
+            "text": "Description: "
+            + article.get("description")
+            + " | Content: "
+            + article.get("content"),
+        }
         documents.append(document)
 
+# # Sample headlines. Discard after
+# with open("sample_headlines.txt", mode="w") as headline_file:
+#     for articles in documents:
+#         headline_file.write(f"{articles}\n")
 
 # Authenticate the client using your key and endpoint
 text_analytics_client = TextAnalyticsClient(endpoint, AzureKeyCredential(key))  # type: ignore
-
 poller = text_analytics_client.begin_abstract_summary(documents)
 abstract_summary_results = poller.result()
+
+# # For Sample
+# results_list = list(abstract_summary_results)  # Discard after
+
+
 for result in abstract_summary_results:
-    # print(vars(result)) # Discard after
     if result.kind == "AbstractiveSummarization":
         print("Summaries abstracted:")
         [print(f"{summary.text}\n") for summary in result.summaries]
@@ -54,4 +68,12 @@ for result in abstract_summary_results:
                 result.error.code, result.error.message
             )
         )
+
+# # Sample summaries. Discard after
+# with open("sample_results.txt", mode="w") as file:
+#     for result in results_list:
+#         file.write(f"{str(result)}\n")
+
+# print(vars(result)) # Discard after
+
 # TODO: Add error handling for summarization
