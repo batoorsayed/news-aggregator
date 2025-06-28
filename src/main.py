@@ -1,9 +1,16 @@
+import logging
 import os
+import sys
 
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
 from newsapi import NewsApiClient
+
+# Logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 # Keys
 load_dotenv()
@@ -16,64 +23,65 @@ newsapi = NewsApiClient(api_key)
 language = "en"
 
 # /v2/top-headlines
-top_headlines = newsapi.get_top_headlines(
-    # q="bitcoin", # keywords
-    # sources="bbc-news,the-verge",
-    # category="business",
-    language=language,
-    country="us",
-    page_size=5,  # Change after
-)
-# TODO: Add error handling fpr NewsAPI
+try:
+    top_headlines = newsapi.get_top_headlines(
+        # q="bitcoin", # keywords
+        # sources="bbc-news,the-verge",
+        # category="business",
+        language=language,
+        country="us",
+        page_size=5,  # Change after
+    )
+except Exception as e:
+    logging.error(f"NewsAPI call failed: {e}")
+    sys.exit()
 
-if top_headlines.get("status") != "ok":
-    print(f"Status: {top_headlines.get('status')}")
-    print(f"Eror Code: {top_headlines.get('code')}")
-    print(f"Error Message: {top_headlines.get('message')}")
-else:
-    print(f"Successfully fetched {top_headlines.get('totalResults')} headlines.")
-    documents = []
-    for idx, article in enumerate(top_headlines["articles"]):
-        document = {
-            "id": idx,
-            "language": language,
-            "text": "Description: "
-            + article.get("description")
-            + " | Content: "
-            + article.get("content"),
-        }
-        documents.append(document)
+# Document Creation
+try:
+    if top_headlines.get("status") != "ok":
+        logging.error(
+            f"{top_headlines.get('status')}- {top_headlines.get('code')}- {top_headlines.get('message')}"
+        )
+    else:
+        logging.info(
+            f"Successfully fetched {top_headlines.get('totalResults')} headlines."
+        )
+        documents = []
+        for idx, article in enumerate(top_headlines["articles"]):
+            document = {
+                "id": idx,
+                "language": language,
+                "text": "Description: "
+                + article.get("description")
+                + " | Content: "
+                + article.get("content"),
+            }
+            documents.append(document)
+except Exception as e:
+    logging.error(f"Document creation failed: {e}")
+    sys.exit()
 
-# # Sample headlines. Discard after
-# with open("sample_headlines.txt", mode="w") as headline_file:
-#     for articles in documents:
-#         headline_file.write(f"{articles}\n")
+# In case Document creation fails
+if len(documents) == 0:
+    logging.warning("Document creation returned empty, aborting process.")
+    sys.exit()
 
 # Authenticate the client using your key and endpoint
-text_analytics_client = TextAnalyticsClient(endpoint, AzureKeyCredential(key))  # type: ignore
-poller = text_analytics_client.begin_abstract_summary(documents)
-abstract_summary_results = poller.result()
-
-# # For Sample
-# results_list = list(abstract_summary_results)  # Discard after
-
+try:
+    text_analytics_client = TextAnalyticsClient(endpoint, AzureKeyCredential(key))  # type: ignore
+    poller = text_analytics_client.begin_abstract_summary(documents)
+    abstract_summary_results = poller.result()
+except Exception as e:
+    logging.error(f"Azure text analytics processing failed: {e}")
+    sys.exit()
 
 for result in abstract_summary_results:
     if result.kind == "AbstractiveSummarization":
-        print("Summaries abstracted:")
+        logging.info(f"Summaries abstracted: {len(result.summaries)}")
         [print(f"{summary.text}\n") for summary in result.summaries]
     elif result.is_error is True:
-        print(
+        logging.error(
             "...Is an error with code '{}' and message '{}'".format(
                 result.error.code, result.error.message
             )
         )
-
-# # Sample summaries. Discard after
-# with open("sample_results.txt", mode="w") as file:
-#     for result in results_list:
-#         file.write(f"{str(result)}\n")
-
-# print(vars(result)) # Discard after
-
-# TODO: Add error handling for summarization
