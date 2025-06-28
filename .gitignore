@@ -195,3 +195,6 @@ cython_debug/
 
 # GitHub Copilot
 copilot-instructions.md
+
+# VS Code settings
+.vscode/settings.json
