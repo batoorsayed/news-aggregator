@@ -1,8 +1,8 @@
 import logging
 import os
+import re
 import sys
 from datetime import datetime
-from uuid import uuid1
 
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
@@ -35,19 +35,31 @@ language = "en"  # Article language
 
 # Azure Cosmos DB Init
 client = CosmosClient.from_connection_string(connection_string)  # type: ignore
+database = client.get_database_client("naive-gazeta")
+container = database.get_container_client("fetched_headlines")  # Change location later
 
 
 def fetched_headlines(articles):
-    """Add unique ID and timestamp to each article."""
-    fetched_articles = {}
+    """Add timestamp to each article. Send a copy to Cosmos DB"""
+    fetched_headlines = {}
     for article in articles:
-        id = uuid1()
-        fetched_articles[id] = {
-            **article,
-            "id": id,
-            "datetime": datetime.now(),
-        }
-    return fetched_articles
+        url_id = re.sub(r"[^a-zA-Z0-9]", "", article.get("url"))
+        if (
+            "url" not in article
+            or article["url"] is None
+            or article["url"].strip() == ""
+        ):
+            continue
+        else:
+            fetched_headlines[url_id] = {
+                **article,
+                "id": url_id,
+                "fetched_datetime": datetime.now().isoformat(),
+            }
+            container.upsert_item(
+                fetched_headlines[url_id]
+            )  # Piggybacking off the function. Make it separate if needed.
+    return fetched_headlines
 
 
 def azure_transformation(headlines):
@@ -55,7 +67,7 @@ def azure_transformation(headlines):
     documents = []
     for id, article in headlines.items():
         document = {
-            "id": id,
+            "id": article.get("url"),
             "language": article.get("language"),
             "text": "Description: "
             + str(article.get("description"))
@@ -64,6 +76,7 @@ def azure_transformation(headlines):
         }
         documents.append(document)
     return documents
+
 
 def main():
     # Fetch latest news headlines from NewsAPI

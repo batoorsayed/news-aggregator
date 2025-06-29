@@ -19,7 +19,7 @@ Aggregates news articles from various sources and provides historical context an
 ### Phase 1: Skeleton
 - Fetch sample articles from NewsAPI SDK
 - Summarize using Foundry SDK
-- Initialy to a text file -> save to db
+- Initially to a text file -> save to db
 
 ### Phase 2: Backend
 - db
