@@ -1,11 +1,12 @@
-import datetime
 import logging
 import os
 import sys
-import uuid
+from datetime import datetime
+from uuid import uuid1
 
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
+from azure.cosmos import CosmosClient
 from dotenv import load_dotenv
 from newsapi import NewsApiClient
 
@@ -20,21 +21,31 @@ load_dotenv()
 api_key = os.getenv("NEWSAPI_KEY")
 key = os.getenv("LANGUAGE_KEY")
 endpoint = os.getenv("LANGUAGE_ENDPOINT")
+connection_string = os.getenv("COSMOS_CONNECTION_STRING")
+
+if not [x for x in (api_key, key, endpoint, connection_string) if x is None]:
+    pass
+else:
+    logging.error("Missing API Key")
+    sys.exit()
 
 # NewsAPI Init
 newsapi = NewsApiClient(api_key)
-language = "en"
+language = "en"  # Article language
+
+# Azure Cosmos DB Init
+client = CosmosClient.from_connection_string(connection_string)  # type: ignore
 
 
 def fetched_headlines(articles):
     """Add unique ID and timestamp to each article."""
     fetched_articles = {}
     for article in articles:
-        id = uuid.uuid1()
+        id = uuid1()
         fetched_articles[id] = {
             **article,
             "id": id,
-            "datetime": datetime.datetime.now(),
+            "datetime": datetime.now(),
         }
     return fetched_articles
 
@@ -54,8 +65,7 @@ def azure_transformation(headlines):
         documents.append(document)
     return documents
 
-
-if __name__ == "__main__":
+def main():
     # Fetch latest news headlines from NewsAPI
     try:
         top_headlines = newsapi.get_top_headlines(
@@ -111,3 +121,7 @@ if __name__ == "__main__":
                     result.error.code, result.error.message
                 )
             )
+
+
+if __name__ == "__main__":
+    main()
