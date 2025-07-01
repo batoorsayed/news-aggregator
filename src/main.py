@@ -54,12 +54,35 @@ def azure_transformation(headlines):
     return documents
 
 
-# For now individual upsert is good enough. I'm not sending thousands of articles per second. What am I, Marcc the Zucc?
+# For now individual upsert is good enough. I'm not sending thousands of articles per second. What am I, Jeff Bezos?
 def save_fetched_articles_to_cosmos(container, fetched_articles):
     """Save or update fetched articles (after adding id and fetched_date) to Cosmos NoSQL DB"""
     for article_id in fetched_articles:
         container.upsert_item(fetched_articles[article_id])
 
+# Store output from Azure Summary to DB
+def save_summary_output_to_cosmos(container, summary_output):
+    for result in summary_output:
+        if result.is_error:
+            summary_data = {
+                "id": result.id,
+                "is_error": result.is_error,
+                "kind": result.kind,
+                "error_code": result.error.code,
+                "error_message": result.error.message,
+            }
+        else:
+            summary_data = {
+                "id": result.id,
+                "is_error": result.is_error,
+                "kind": result.kind,
+                "summaries": [summary.text for summary in result.summaries],
+                "warnings": [
+                    {"code": warning.code, "message": warning.message}
+                    for warning in result.warnings
+                ],
+            }
+        container.upsert_item(summary_data)
 
 def main():
     # Keys
@@ -70,9 +93,20 @@ def main():
     connection_string = os.getenv("COSMOS_CONNECTION_STRING")
     db_name = os.getenv("COSMOS_DB_NAME")
     fetched_headlines = os.getenv("FETCHED_ARTICLE_CONTAINER_NAME")
+    summarized_articles = os.getenv("SUMMARY_OUTPUT_CONTAINER_NAME")
 
     # Check for missing API Keys
-    if not all([api_key, key, endpoint, connection_string, db_name, fetched_headlines]):
+    if not all(
+        [
+            api_key,
+            key,
+            endpoint,
+            connection_string,
+            db_name,
+            fetched_headlines,
+            summarized_articles,
+        ]
+    ):
         logging.error("Missing API Key")
         sys.exit()
 
@@ -84,6 +118,7 @@ def main():
     client = CosmosClient.from_connection_string(connection_string)  # type: ignore
     database = client.get_database_client(db_name)  # type: ignore
     fetched_article_container = database.get_container_client(fetched_headlines)  # type: ignore
+    summarized_article_container = database.get_container_client(summarized_articles)  # type: ignore
 
     # Fetch latest news headlines from NewsAPI
     try:
@@ -122,8 +157,10 @@ def main():
 
     try:
         save_fetched_articles_to_cosmos(fetched_article_container, headlines)
+        logging.info("Successfully saved fetched articles to DB")
     except Exception as e:
         logging.error(f"Unable to save fetched articles to DB: {e}")
+        # TODO: Should I abort the process or not?
 
     # Generate summaries using Azure Text Analytics
     try:
@@ -131,20 +168,19 @@ def main():
         poller = text_analytics_client.begin_abstract_summary(documents)
         abstract_summary_results = poller.result()
     except Exception as e:
-        logging.error(f"Azure text analytics processing failed: {e}")
+        logging.critical(f"Azure text analytics processing failed: {e}")
         sys.exit()
 
-    # Display the generated summaries
-    # TODO: Ship this to DB instead
-    for result in abstract_summary_results:
-        if result.kind == "AbstractiveSummarization":
-            logging.info("Abstracted Summary:")
-            for summary in result.summaries:
-                print(f"{summary.text}\n")
-        elif result.is_error is True:
-            logging.error(
-                f"...Is an error with code {result.error.code} and message {result.error.message}"
-            )
+    # Store output from Azure Summary to DB
+    try:
+        save_summary_output_to_cosmos(
+            container=summarized_article_container,
+            summary_output=abstract_summary_results,
+        )
+        logging.info("Successfully saved summarized articles to DB")
+    except Exception as e:
+        logging.critical(f"Unable to save summarized articles to DB {e}")
+        sys.exit()
 
 
 if __name__ == "__main__":
