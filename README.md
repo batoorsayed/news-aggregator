@@ -17,12 +17,12 @@ Aggregates news articles from various sources and provides historical context an
 
 ## Plan
 ### Phase 1: Skeleton
-- Fetch sample articles from NewsAPI SDK
-- Summarize using Foundry SDK
-- Initially to a text file -> save to db
+- [x] Fetch sample articles from NewsAPI SDK
+- [x] Summarize using Foundry SDK
+- [x] Initially to a text file -> save to db
 
 ### Phase 2: Backend
-- db
+- [x] DB
 ...
 
 ### Phase 3: Frontend
