@@ -73,8 +73,8 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1D7ADA5162EA47ECA0876446C587BEB4 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E7B45001334B49C08DF08DC2D763E88C }}
 
-      - name: 'Deploy to Azure Functions'
-        uses: Azure/functions-action@v1
+      - name: Azure Functions Action
+        uses: Azure/functions-action@v1.5.3
         id: deploy-to-function
         with:
           app-name: 'naivegazeta-storeheadlines'
