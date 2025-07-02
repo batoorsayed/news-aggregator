@@ -197,4 +197,16 @@ cython_debug/
 copilot-instructions.md
 
 # VS Code settings
-.vscode/settings.json
+# .vscode/settings.json
+
+# Azure Functions artifacts
+bin
+obj
+appsettings.json
+local.settings.json
+
+# Azurite artifacts
+__blobstorage__
+__queuestorage__
+__azurite_db*__.json
+.python_packages

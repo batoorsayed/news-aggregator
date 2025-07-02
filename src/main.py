@@ -1,7 +1,6 @@
 import logging
 import os
 import re
-import sys
 from datetime import datetime
 
 from azure.ai.textanalytics import TextAnalyticsClient
@@ -86,7 +85,9 @@ def save_summary_output_to_cosmos(container, summary_output):
 
 def main():
     # Keys
-    load_dotenv()
+    # Only load .env file if running locally
+    if os.getenv("AZURE_FUNCTIONS_ENVIRONMENT") is None:
+        load_dotenv()
     api_key = os.getenv("NEWSAPI_KEY")
     key = os.getenv("LANGUAGE_KEY")
     endpoint = os.getenv("LANGUAGE_ENDPOINT")
@@ -108,7 +109,7 @@ def main():
         ]
     ):
         logging.error("Missing API Key")
-        sys.exit()
+        raise
 
     # NewsAPI Init
     newsapi = NewsApiClient(api_key)
@@ -132,7 +133,7 @@ def main():
         )
     except Exception as e:
         logging.error(f"NewsAPI call failed: {e}")
-        sys.exit()
+        raise
 
     # Process and enrich articles with metadata
     try:
@@ -148,12 +149,12 @@ def main():
             documents = azure_transformation(headlines=headlines)
     except Exception as e:
         logging.error(f"Document creation failed: {e}")
-        sys.exit()
+        raise
 
     # Validate we have documents to process
     if len(documents) == 0:
         logging.warning("Document creation returned empty, aborting process.")
-        sys.exit()
+        raise
 
     try:
         save_fetched_articles_to_cosmos(fetched_article_container, headlines)
@@ -169,7 +170,7 @@ def main():
         abstract_summary_results = poller.result()
     except Exception as e:
         logging.critical(f"Azure text analytics processing failed: {e}")
-        sys.exit()
+        raise
 
     # Store output from Azure Summary to DB
     try:
@@ -180,7 +181,7 @@ def main():
         logging.info("Successfully saved summarized articles to DB")
     except Exception as e:
         logging.critical(f"Unable to save summarized articles to DB {e}")
-        sys.exit()
+        raise
 
 
 if __name__ == "__main__":
