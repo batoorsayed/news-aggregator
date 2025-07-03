@@ -31,6 +31,6 @@ Aggregates news articles from various sources and provides historical context an
 - Blog
 
 ### Phase 4: Feature Completion
-- Daily automation
+- [x] Daily automation
 - Root cause analysis & historical context
 - Add more sources (? maybe NewsAPI is enough)
