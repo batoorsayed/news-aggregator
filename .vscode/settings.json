@@ -1,18 +1,14 @@
 {
-    "cSpell.words": [
-        "appsettings",
-        "Bezos",
-        "gazeta",
-        "levelname",
-        "newsapi",
-        "storeheadlines",
-        "textanalytics"
-    ],
-    "azureFunctions.deploySubpath": ".",
-    "azureFunctions.scmDoBuildDuringDeployment": true,
-    "azureFunctions.pythonVenv": ".venv",
-    "azureFunctions.projectLanguage": "Python",
-    "azureFunctions.projectRuntime": "~4",
-    "debug.internalConsoleOptions": "neverOpen",
-    "azureFunctions.projectLanguageModel": 2
+  "azureFunctions.deploySubpath": ".",
+  "azureFunctions.scmDoBuildDuringDeployment": true,
+  "azureFunctions.pythonVenv": ".venv",
+  "azureFunctions.projectLanguage": "Python",
+  "azureFunctions.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.projectLanguageModel": 2,
+  "cSpell.words": [
+    "Bezos",
+    "NEWSAPI",
+    "textanalytics"
+  ]
 }
