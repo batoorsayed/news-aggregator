@@ -7,8 +7,11 @@
   "debug.internalConsoleOptions": "neverOpen",
   "azureFunctions.projectLanguageModel": 2,
   "cSpell.words": [
+    "appsettings",
     "Bezos",
+    "blobstorage",
     "NEWSAPI",
+    "queuestorage",
     "textanalytics"
   ]
 }

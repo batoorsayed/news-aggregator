@@ -194,5 +194,43 @@ def daily_fetch_store(myTimer: func.TimerRequest) -> None:
 
         logging.info(msg='Python timer trigger function executed.')
 
+        # Extract data from headlines
+        merged_articles = []
+        for article_id, article in headlines.items():
+            article_data = {
+                "id": article.get("id"),
+                "source": article.get("source"),
+                "author": article.get("author"),
+                "title": article.get("title"),
+                "url": article.get("url"),
+                "urlToImage": article.get("urlToImage"),
+                "publishedAt": article.get("publishedAt"),
+                "fetched_datetime": article.get("fetched_datetime"),
+            }
+            merged_articles.append(article_data)
+
+        # Add summary data to matching articles
+        for result in abstract_summary_results:
+            # Find matching article by id
+            for article in merged_articles:
+                if article["id"] == result.id:
+                    if result.is_error:
+                        article["is_error"] = True
+                        article["summaries"] = None
+                    else:
+                        article["is_error"] = False
+                        article["summaries"] = [
+                            summary.text for summary in result.summaries
+                        ]
+                    break
+
+        # Filter out articles with errors
+        successful_articles = [
+            article for article in merged_articles if not article.get("is_error", True)
+        ]
+
+        # Merge data in successful_articles
+        print(f"Successfully merged {len(successful_articles)} articles")
+
     except Exception as e:
         logging.critical(f"Unhandled exception in daily_fetch_store: {e}")
