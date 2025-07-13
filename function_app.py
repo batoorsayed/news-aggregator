@@ -321,7 +321,7 @@ def daily_fetch_store(myTimer: func.TimerRequest) -> None:
         # Create the post payload for WordPress API
         post = {
             "title": title,
-            "status": "draft",
+            "status": "publish",
             "content": content,
             "categories": 6,
         }
