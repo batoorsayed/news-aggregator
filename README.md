@@ -27,8 +27,8 @@ Aggregates news articles from various sources and provides historical context an
 
 ### Phase 3: Frontend
 - RSS Feed
-- Newsletter
-- Blog
+- [x] Newsletter
+- [x] Blog
 
 ### Phase 4: Feature Completion
 - [x] Daily automation
