@@ -7,3 +7,5 @@ local.settings.json
 test
 .venv
 README.md
+sample_data.py
+wp_post.py
