@@ -302,10 +302,10 @@ def daily_fetch_store(myTimer: func.TimerRequest) -> None:
         auth = HTTPBasicAuth(api_username, api_password)  # type: ignore
 
         # Prepare the post title using yesterday's date
-        title = "Headlines from: " + str(date.today() - timedelta(days=1))
+        title = str(date.today() - timedelta(days=1)) + " - Daily Headlines"
 
         # Start building the HTML content for the WordPress post
-        content = f'<h3 style="text-align: center;">{title}</h3>&nbsp;\n'
+        content = ""
 
         # Add each successful article to the post content
         for i, article in enumerate(successful_articles, 1):
