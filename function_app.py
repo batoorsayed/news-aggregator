@@ -11,6 +11,7 @@ from azure.cosmos import CosmosClient
 from newsapi.newsapi_client import NewsApiClient
 from requests.auth import HTTPBasicAuth
 
+# TODO: Add type hints to the functions and variables.
 try:
 
     def enrich_articles(articles):
@@ -208,7 +209,7 @@ def daily_fetch_store(myTimer: func.TimerRequest) -> None:
                 # category="business",
                 language=language,
                 country="us",
-                page_size=5,  # Change after
+                page_size=5,  # Change after. This adjusts the number of articles fetched
             )
         except Exception as e:
             logging.error(f"NewsAPI call failed: {e}")
@@ -248,7 +249,8 @@ def daily_fetch_store(myTimer: func.TimerRequest) -> None:
                 endpoint, AzureKeyCredential(key)
             )  # type: ignore
             poller = text_analytics_client.begin_abstract_summary(
-                documents, sentence_count=2
+                documents,
+                sentence_count=2,  # TODO: Sentence count is not working as expected
             )
             poller.wait()  # Waiting for the operation to complete
             abstract_summary_results = list(poller.result())
@@ -323,7 +325,7 @@ def daily_fetch_store(myTimer: func.TimerRequest) -> None:
             "title": title,
             "status": "publish",
             "content": content,
-            "categories": 6,
+            "categories": 6,  # This maps to the "Daily Headlines" category in WordPress
         }
 
         # Send the post to WordPress using the REST API
@@ -342,3 +344,5 @@ def daily_fetch_store(myTimer: func.TimerRequest) -> None:
         logging.critical(
             f"Unhandled exception in daily_fetch_store: {e}", exc_info=True
         )
+
+# TODO: Modularize the code further. This whole thing needs to be blown to separate files.
