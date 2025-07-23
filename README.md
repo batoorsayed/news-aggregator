@@ -15,26 +15,26 @@ Aggregates news articles from various sources and provides historical context an
 
 ### Architecture
 ```
-                    ┌─────────┐
-                    │NewsAPI  │
-                    │         │
-                    └────┬────┘
-                         │
-┌─────────┐    ┌─────────▼─────────┐    ┌─────────┐
+                     ┌─────────┐
+                     │NewsAPI  │
+                     │         │
+                     └────┬────┘
+                          │
+┌─────────┐     ┌─────────▼─────────┐     ┌─────────┐
 │  Timer  │───▶│  Azure Function   │───▶│WordPress│
-│ Trigger │    │     (Python)      │    │   Site  │
-└─────────┘    └─────────┬─────────┘    └─────────┘
-                         │
-                    ┌────▼──────┐
-                    │Azure      │
-                    │Abstractive│
-                    │Summary    │
-                    └───────────┘
-                         │
-                    ┌────▼────┐
-                    │Database │
-                    │(Cosmos) │
-                    └─────────┘
+│ Trigger │     │     (Python)      │     │   Site  │
+└─────────┘     └─────────▲─────────┘     └─────────┘
+                          │
+                     ┌────▼──────┐
+                     │Azure      │
+                     │Abstractive│
+                     │Summary    │
+                     └───────────┘
+                          │
+                     ┌────▼────┐
+                     │Database │
+                     │(Cosmos) │
+                     └─────────┘
 ```
 
 ### Flow Description
@@ -43,7 +43,7 @@ Aggregates news articles from various sources and provides historical context an
 2. **Function** fetches articles from **NewsAPI**
 3. **Function** sends articles to **AI Summary**
 4. **Function** stores results in **Database**
-5. **Function** posts formatted content to **WordPress**
+5. **Function** posts formatted content to **WordPress**  (for now its [batoorsayed.com/daily-headlines](https://www.batoorsayed.com/daily-headlines/))
 6. **Users** read the daily digest
 
 
@@ -63,5 +63,6 @@ Aggregates news articles from various sources and provides historical context an
 
 ### Phase 4: Feature Completion
 - [x] Daily automation
-- Root cause analysis & historical context
-- Add more sources (? maybe NewsAPI is enough)
+- [ ] Root cause analysis & historical context
+- [ ] Add more sources (? maybe NewsAPI is enough)
+- [ ] Set up a proper domain
