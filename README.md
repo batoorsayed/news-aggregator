@@ -39,11 +39,11 @@ Aggregates news articles from various sources and provides historical context an
 
 ### Flow Description
 
-1. **Timer** triggers **Function** daily
-2. **Function** fetches articles from **NewsAPI**
-3. **Function** sends articles to **AI Summary**
-4. **Function** stores results in **Database**
-5. **Function** posts formatted content to **WordPress**  (for now its [batoorsayed.com/daily-headlines](https://www.batoorsayed.com/daily-headlines/))
+1. **[Timer](https://github.com/batoorsayed/news-aggregator/blob/3e0046ba09451c09c8f35379c379ae3f242b46d1/function_app.py#L152)** triggers **[Function](https://github.com/batoorsayed/news-aggregator/blob/3e0046ba09451c09c8f35379c379ae3f242b46d1/function_app.py#L155C1-L155C4)** daily
+2. **Function** [fetches articles from **NewsAPI**](https://github.com/batoorsayed/news-aggregator/blob/3e0046ba09451c09c8f35379c379ae3f242b46d1/function_app.py#L204)
+3. **Function** [sends articles to **AI Summary**](https://github.com/batoorsayed/news-aggregator/blob/3e0046ba09451c09c8f35379c379ae3f242b46d1/function_app.py#L246)
+4. **Function** [stores results in **Database**](https://github.com/batoorsayed/news-aggregator/blob/3e0046ba09451c09c8f35379c379ae3f242b46d1/function_app.py#L261)
+5. **Function** posts formatted ([step 1](https://github.com/batoorsayed/news-aggregator/blob/3e0046ba09451c09c8f35379c379ae3f242b46d1/function_app.py#L284), [step 2](https://github.com/batoorsayed/news-aggregator/blob/3e0046ba09451c09c8f35379c379ae3f242b46d1/function_app.py#L309)) content to **[WordPress](https://github.com/batoorsayed/news-aggregator/blob/3e0046ba09451c09c8f35379c379ae3f242b46d1/function_app.py#L309)**  (for now its [batoorsayed.com/daily-headlines](https://www.batoorsayed.com/daily-headlines/))
 6. **Users** read the daily digest
 
 
