@@ -13,6 +13,38 @@ Aggregates news articles from various sources and provides historical context an
     - RSS feed
     - Newsletters
 
+### Architecture
+```
+                    ┌─────────┐
+                    │NewsAPI  │
+                    │         │
+                    └────┬────┘
+                         │
+┌─────────┐    ┌─────────▼─────────┐    ┌─────────┐
+│  Timer  │───▶│  Azure Function   │───▶│WordPress│
+│ Trigger │    │     (Python)      │    │   Site  │
+└─────────┘    └─────────┬─────────┘    └─────────┘
+                         │
+                    ┌────▼──────┐
+                    │Azure      │
+                    │Abstractive│
+                    │Summary    │
+                    └───────────┘
+                         │
+                    ┌────▼────┐
+                    │Database │
+                    │(Cosmos) │
+                    └─────────┘
+```
+
+### Flow Description
+
+1. **Timer** triggers **Function** daily
+2. **Function** fetches articles from **NewsAPI**
+3. **Function** sends articles to **AI Summary**
+4. **Function** stores results in **Database**
+5. **Function** posts formatted content to **WordPress**
+6. **Users** read the daily digest
 
 
 ## Plan
@@ -23,11 +55,10 @@ Aggregates news articles from various sources and provides historical context an
 
 ### Phase 2: Backend
 - [x] DB
-...
 
 ### Phase 3: Frontend
-- RSS Feed
-- [x] Newsletter
+- [x] RSS Feed
+- [ ] Newsletter
 - [x] Blog
 
 ### Phase 4: Feature Completion
